@@ -21,11 +21,11 @@
 
 ## 🚀 Quick Start
 
-```bash
 # Clone this repo
+```bash
 git clone https://github.com/your-org/repo-deploy
 cd repo-deploy
-
+```
 # Bootstrap a new repo (interactive or scripted)
 ./run-bootstrap.sh example-repo aws "yaml,cloudformation" "Demo repo using repo-deploy" ~/git/example-repo
 
