@@ -205,7 +205,8 @@ jobs:
           echo "🔁 Repo-deploy version check:"
           echo "🔒 Current: $CURRENT"
           echo "🌐 Latest : $LATEST"
-          
+
+
           if [[ "$CURRENT" != "$LATEST" ]]; then
             echo "❌ Repo is using an outdated repo-deploy config."
             echo "Please re-bootstrap or run the sync script"
