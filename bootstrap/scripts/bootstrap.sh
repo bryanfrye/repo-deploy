@@ -100,6 +100,18 @@ if [[ -n "$LINTERS" ]]; then
   echo "$LINTERS" | tr ',' '\n' > .linters
 fi
 
+# Write .linters file
+IFS=',' read -ra LINTER_ARRAY <<< "$LINTERS"
+
+# Auto-include cfn_nag if provider is AWS
+if [[ "$PROVIDER" == "aws" && ! " ${LINTER_ARRAY[@]} " =~ " cfn_nag " ]]; then
+  LINTERS="$LINTERS,cfn_nag"
+  echo "📎 Automatically adding cfn_nag for AWS projects"
+fi
+
+# Final .linters output
+echo "$LINTERS" | tr ',' '\n' > .linters
+
 # Create GitHub workflow (will be enhanced later)
 mkdir -p .github/workflows
 cat <<'EOF' > .github/workflows/deploy.yaml
@@ -186,6 +198,10 @@ jobs:
           git clone https://github.com/bryanfrye/repo-deploy.git
           ./repo-deploy/scripts/deploy_stacks.sh
 EOF
+
+cp "$SCRIPT_DIR/../hooks/pre-commit" "$DEST_DIR/.git/hooks/pre-commit"
+chmod +x "$DEST_DIR/.git/hooks/pre-commit"
+echo "✅ Pre-commit hook installed at $DEST_DIR/.git/hooks/pre-commit"
 
 # Initial commit
 git config user.name "github-actions"
