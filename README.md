@@ -21,42 +21,45 @@
 
 ## 🚀 Quick Start
 
-# Clone this repo
+### Clone this repo
 ```bash
 git clone https://github.com/your-org/repo-deploy
 cd repo-deploy
 ```
-# Bootstrap a new repo (interactive or scripted)
+### Bootstrap a new repo (interactive or scripted)
 ```bash
 ./run-bootstrap.sh example-repo aws "yaml,cloudformation" "Demo repo using repo-deploy" ~/git/example-repo
 ```
-This will:
-	•	✅ Create a new repo directory at the specified destination
-	•	✅ Initialize it with provider-specific templates (e.g., CloudFormation under deploy/cloudformation/)
-	•	✅ Add a .linters file with selected linters (e.g., yaml, cloudformation)
-	•	✅ Add .github/workflows/deploy.yaml that:
-	•	Installs only the requested linters
-	•	Calls scripts/run_linters.sh to run them
+### This will:
+- ✅ Create a new repo directory at the specified destination
+- ✅ Initialize it with provider-specific templates (e.g., CloudFormation under deploy/cloudformation/)
+- ✅ Add a .linters file with selected linters (e.g., yaml, cloudformation)
+- ✅ Add .github/workflows/deploy.yaml that:
+- Installs only the requested linters
+- Calls scripts/run_linters.sh to run them
 
-🛠️ Linters Supported
-	•	yaml → yamllint
-	•	cloudformation → cfn-lint
-	•	shell → ShellCheck
-	•	ansible → ansible-lint
-	•	terraform → terraform fmt
-	•	puppet → puppet-lint
-	•	ruby → rubocop
-	•	python → pylint
-	•	markdown → markdownlint-cli
+### 🛠️ Linters Supported
+- yaml → yamllint
+- cloudformation → cfn-lint
+- shell → ShellCheck
+- ansible → ansible-lint
+- terraform → terraform fmt
+- puppet → puppet-lint
+- ruby → rubocop
+- python → pylint
+- markdown → markdownlint-cli
 
-🧰 Scripts Overview
+### 🧰 Scripts Overview
+```bash
 scripts/
 ├── run_linters.sh            # Dispatcher for selected linters
 └── linters/
     ├── lint_yaml.sh
     ├── lint_cloudformation.sh
     └── ...                   # See full list above
-📁 Directory Layout (Example Repo)
+```
+### 📁 Directory Layout (Example Repo)
+```bash
 .
 ├── .github/
 │   └── workflows/
@@ -68,11 +71,13 @@ scripts/
 │   └── linters/
 ├── .linters                  # List of linters for this repo
 └── README.md
-🧪 Roadmap
-	•	Auto-push updates to deploy.yaml from repo-deploy
-	•	Azure and GCP support
-	•	Template validation for each cloud provider
-	•	Web-based repo creation via GitHub issue forms
+```
+
+### 🧪 Roadmap
+- Auto-push updates to deploy.yaml from repo-deploy
+- Azure and GCP support
+- Template validation for each cloud provider
+- Web-based repo creation via GitHub issue forms
 
 ⸻
 
