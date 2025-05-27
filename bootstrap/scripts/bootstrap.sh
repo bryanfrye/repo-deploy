@@ -55,6 +55,9 @@ if [[ ! -d "$TEMPLATE_SOURCE" ]]; then
   exit 1
 fi
 
+VERSION_HASH=$(git rev-parse --short HEAD)
+echo "$VERSION_HASH" > "$DEST_DIR/.repo-deploy-version"
+
 # -----------------------------
 # Start scaffolding
 # -----------------------------
@@ -183,6 +186,26 @@ jobs:
           ./scripts/run_linters.sh
 
   deploy:
+    name: Fetch latest repo-deploy commit hash
+    run: |
+      curl -s -o latest-hash.txt https://api/github.com/repos/bryanfrye/repo-deploy/commits/main \
+        | jq -r '.sha' | cut -c1-7 > latest-hash.txt
+
+    name: Compare repo-deploy version
+    run: |
+      CURRENT=$(cat .repo-deploy-version)
+      LATEST=$(cat latest-hash.txt)
+
+      echo "🔁 Repo-deploy version check:"
+      echo "🔒 Current: $CURRENT"
+      echo "🌐 Latest : $LATEST"
+
+      if [[ "$CURRENT" != "$LATEST" ]]; then
+        echo "❌ Repo is using an outdated repo-deploy config."
+        echo "Please re-bootstrap or run the sync script to pull the latest workflow/scripts."
+        exit 1
+      fi
+
     name: Deploy to $PROVIDER
     runs-on: ubuntu-latest
     environment: production
