@@ -186,41 +186,43 @@ jobs:
           ./scripts/run_linters.sh
 
   deploy:
-    name: Fetch latest repo-deploy commit hash
-    run: |
-      curl -s -o latest-hash.txt https://api/github.com/repos/bryanfrye/repo-deploy/commits/main \
-        | jq -r '.sha' | cut -c1-7 > latest-hash.txt
+    - name: Fetch latest repo-deploy commit hash
+      run: |
+        curl -s \
+          https://api.github.com/repos/bryanfrye/repo-deploy/commits/main \
+          | jq -r '.sha' | cut -c1-7 > latest-hash.txt
 
-    name: Compare repo-deploy version
-    run: |
-      CURRENT=$(cat .repo-deploy-version)
-      LATEST=$(cat latest-hash.txt)
+    - name: Compare repo-deploy version
+      run: |
+        CURRENT=$(cat .repo-deploy-version)
+        LATEST=$(cat latest-hash.txt)
 
-      echo "🔁 Repo-deploy version check:"
-      echo "🔒 Current: $CURRENT"
-      echo "🌐 Latest : $LATEST"
+        echo "🔁 Repo-deploy version check:"
+        echo "🔒 Current: $CURRENT"
+        echo "🌐 Latest : $LATEST"
 
-      if [[ "$CURRENT" != "$LATEST" ]]; then
-        echo "❌ Repo is using an outdated repo-deploy config."
-        echo "Please re-bootstrap or run the sync script to pull the latest workflow/scripts."
-        exit 1
-      fi
+        if [[ "$CURRENT" != "$LATEST" ]]; then
+          echo "❌ Repo is using an outdated repo-deploy config."
+          echo "Please re-bootstrap or run the sync script"
+          echo "to pull the latest workflow/scripts."
+          exit 1
+        fi
 
-    name: Deploy to $PROVIDER
-    runs-on: ubuntu-latest
-    environment: production
-    needs: lint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Deploy to $PROVIDER
+      runs-on: ubuntu-latest
+      environment: production
+      needs: lint
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
 
-      - name: Configure Credentials
-        run: echo "Configure credentials for $PROVIDER (stub)"
+        - name: Configure Credentials
+          run: echo "Configure credentials for $PROVIDER (stub)"
 
-      - name: Deploy
-        run: |
-          git clone https://github.com/bryanfrye/repo-deploy.git
-          ./repo-deploy/scripts/deploy_stacks.sh
+        - name: Deploy
+          run: |
+            git clone https://github.com/bryanfrye/repo-deploy.git
+            ./repo-deploy/scripts/deploy_stacks.sh
 EOF
 
 # Copy scripts folder into the new repo
