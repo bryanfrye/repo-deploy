@@ -115,11 +115,12 @@ echo "$LINTERS" | tr ',' '\n' > .linters
 # Create GitHub workflow (will be enhanced later)
 mkdir -p .github/workflows
 cat <<'EOF' > .github/workflows/deploy.yaml
+---
 # Managed by repo-deploy
 
 name: Deploy Infrastructure
 
-on:
+'on':
   push:
     branches: [main]
   workflow_dispatch:
@@ -198,6 +199,18 @@ jobs:
           git clone https://github.com/bryanfrye/repo-deploy.git
           ./repo-deploy/scripts/deploy_stacks.sh
 EOF
+
+# Copy scripts folder into the new repo
+SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
+SCRIPTS_DEST="$DEST_DIR/scripts"
+
+if [[ -d "$SCRIPTS_SOURCE" ]]; then
+  echo "📁 Copying scripts/ to new repo"
+  mkdir -p "$SCRIPTS_DEST"
+  cp -R "$SCRIPTS_SOURCE/"* "$SCRIPTS_DEST/"
+else
+  echo "⚠️  scripts/ folder not found in repo-deploy"
+fi
 
 cp "$SCRIPT_DIR/../hooks/pre-commit" "$DEST_DIR/.git/hooks/pre-commit"
 chmod +x "$DEST_DIR/.git/hooks/pre-commit"
