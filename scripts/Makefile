@@ -14,3 +14,7 @@ deploy:
 check-version:
 	@echo "🔁 Checking repo-deploy version..."
 	@./scripts/check_repo_version.sh
+
+update:
+	echo "🔄 Updating dependencies..."
+	@./scripts/update_repo_deploy.sh
