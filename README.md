@@ -27,8 +27,9 @@ git clone https://github.com/your-org/repo-deploy
 cd repo-deploy
 ```
 # Bootstrap a new repo (interactive or scripted)
+```bash
 ./run-bootstrap.sh example-repo aws "yaml,cloudformation" "Demo repo using repo-deploy" ~/git/example-repo
-
+```
 This will:
 	•	✅ Create a new repo directory at the specified destination
 	•	✅ Initialize it with provider-specific templates (e.g., CloudFormation under deploy/cloudformation/)
