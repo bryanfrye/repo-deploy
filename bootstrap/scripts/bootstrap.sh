@@ -1,23 +1,15 @@
-#!/bin/bash - 
+#!/bin/bash
 #===============================================================================
 #
-#          FILE: bootstrap.sh
+#          FILE:  bootstrap.sh
 # 
-#         USAGE: ./bootstrap.sh 
+#         USAGE:  Called by run-bootstrap.sh or manually to scaffold a new repo
 # 
-#   DESCRIPTION: 
-# 
-#       OPTIONS: ---
-#  REQUIREMENTS: ---
-#          BUGS: ---
-#         NOTES: ---
-#        AUTHOR: YOUR NAME (), 
-#  ORGANIZATION: 
-#       CREATED: 05/27/2025 16:37
-#      REVISION:  ---
+#  DESCRIPTION:  Bootstraps a new cloud infrastructure repo using template stubs.
+#                Currently supports AWS; Azure and GCP stubs can be added later.
+#
 #===============================================================================
 
-set -o nounset                              # Treat unset variables as an error
 set -euo pipefail
 
 PROVIDER=""
@@ -26,6 +18,9 @@ LINTERS=""
 DESCRIPTION=""
 DEST_DIR=""
 
+# -----------------------------
+# Parse input arguments
+# -----------------------------
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --provider)     PROVIDER="$2"; shift 2;;
@@ -37,8 +32,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# -----------------------------
+# Validate required inputs
+# -----------------------------
 if [[ -z "$REPO_NAME" || -z "$PROVIDER" ]]; then
-  echo "Error: --repo-name and --provider are required"
+  echo "❌ Error: --repo-name and --provider are required"
   exit 1
 fi
 
@@ -46,19 +44,44 @@ if [[ -z "$DEST_DIR" ]]; then
   DEST_DIR="./$REPO_NAME"
 fi
 
+# -----------------------------
+# Resolve absolute template path
+# -----------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_SOURCE="$SCRIPT_DIR/../templates/$PROVIDER"
+
+if [[ ! -d "$TEMPLATE_SOURCE" ]]; then
+  echo "❌ ERROR: Template directory not found: $TEMPLATE_SOURCE"
+  exit 1
+fi
+
+# -----------------------------
+# Start scaffolding
+# -----------------------------
 echo "=== Bootstrapping repo: $REPO_NAME for $PROVIDER ==="
 echo "📁 Destination: $DEST_DIR"
-
-# Uncomment to create real GitHub repo
-# gh repo create "$REPO_NAME" --private --confirm --description "$DESCRIPTION"
 
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 git init
 
-# Copy skeleton templates
-cp -r ../../bootstrap/templates/$PROVIDER/* .
-mkdir -p deploy/parameters
+case "$PROVIDER" in
+  azure|gcp)
+    echo "🌐 Using cloud provider: $PROVIDER"
+    ;;
+  aws)
+    echo "🌐 Using cloud provider: $PROVIDER"
+    # Create initial AWS-specific files
+    mkdir -p deploy/cloudformation
+    cp "$TEMPLATE_SOURCE/ec2.yaml.example" "./deploy/cloudformation/ec2.yaml.example"
+    mkdir -p deploy/parameters
+    cp "$TEMPLATE_SOURCE/ec2.params.json.example" "./deploy/parameters/ec2.params.json.example"
+    ;;
+  *)
+    echo "❌ Unsupported provider: $PROVIDER"
+    exit 1
+    ;;
+esac
 
 # Create README.md
 if [[ ! -f README.md ]]; then
@@ -72,15 +95,15 @@ $DESCRIPTION
 EOF
 fi
 
-# Save selected linters
+# Store linter config
 if [[ -n "$LINTERS" ]]; then
   echo "$LINTERS" | tr ',' '\n' > .linters
 fi
 
-# Generate deploy.yaml
+# Create GitHub workflow (will be enhanced later)
 mkdir -p .github/workflows
-cat <<EOF > .github/workflows/deploy.yaml
-# Managed by repo-deploy v1.0
+cat <<'EOF' > .github/workflows/deploy.yaml
+# Managed by repo-deploy
 
 name: Deploy Infrastructure
 
@@ -95,7 +118,51 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Read requested linters
+        id: read-linters
+        run: |
+          if [[ -f .linters ]]; then
+            LINTERS=\$(cat .linters | tr '\n' ',')
+          else
+            LINTERS="none"
+          fi
+          echo "LINTERS=\$LINTERS" >> \$GITHUB_ENV
+
+      - name: Install requested linters
+        run: |
+          for linter in $LINTERS; do
+            case "$linter" in
+              yaml)
+                pip install yamllint
+                ;;
+              cloudformation)
+                pip install cfn-lint
+                ;;
+              shell)
+                sudo apt-get update && sudo apt-get install -y shellcheck
+                ;;
+              ansible)
+                pip install ansible-lint
+                ;;
+              terraform)
+                sudo apt-get install -y terraform
+                ;;
+              puppet)
+                gem install puppet-lint
+                ;;
+              ruby)
+                gem install rubocop
+                ;;
+              python)
+                pip install pylint
+                ;;
+              markdown)
+                npm install -g markdownlint-cli
+                ;;
+            esac
+          done
 
       - name: Run selected linters
         run: |
@@ -111,20 +178,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        if: $PROVIDER == "aws"
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-region: us-east-1
-          role-to-assume: arn:aws:iam::123456789012:role/GitHubDeployRole
-
-      - name: Deploy with repo-deploy
+      - name: Configure Credentials
+        run: echo "Configure credentials for $PROVIDER (stub)"
+      
+      - name: Deploy
         run: |
           git clone https://github.com/bryanfrye/repo-deploy.git
           ./repo-deploy/scripts/deploy_stacks.sh
 EOF
 
-# Optionally commit locally
+# Initial commit
 git config user.name "github-actions"
 git config user.email "github-actions@github.com"
 git add .
