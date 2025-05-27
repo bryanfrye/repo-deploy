@@ -2,9 +2,9 @@
 #===============================================================================
 #
 #          FILE:  bootstrap.sh
-# 
+#
 #         USAGE:  Called by run-bootstrap.sh or manually to scaffold a new repo
-# 
+#
 #  DESCRIPTION:  Bootstraps a new cloud infrastructure repo using template stubs.
 #                Currently supports AWS; Azure and GCP stubs can be added later.
 #
@@ -90,7 +90,7 @@ if [[ ! -f README.md ]]; then
 
 $DESCRIPTION
 
-**Cloud Provider:** $PROVIDER  
+**Cloud Provider:** $PROVIDER
 **Selected Linters:** ${LINTERS:-none}
 EOF
 fi
@@ -193,7 +193,7 @@ jobs:
 
       - name: Configure Credentials
         run: echo "Configure credentials for $PROVIDER (stub)"
-      
+
       - name: Deploy
         run: |
           git clone https://github.com/bryanfrye/repo-deploy.git

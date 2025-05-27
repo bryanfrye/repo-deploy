@@ -1,0 +1,18 @@
+#!/bin/bash
+if [[ "$(basename "$PWD")" == "repo-deploy" ]]; then
+  echo "🛑 Skipping linters in repo-deploy"
+  exit 0
+fi
+
+echo "🔍 Running pre-commit linters..."
+
+if [ -f "./scripts/run_linters.sh" ]; then
+  ./scripts/run_linters.sh
+  STATUS=$?
+  if [ $STATUS -ne 0 ]; then
+    echo "❌ Linters failed. Commit aborted."
+    exit $STATUS
+  fi
+else
+  echo "⚠️ No run_linters.sh found. Skipping linters."
+fi
