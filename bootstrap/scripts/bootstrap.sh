@@ -233,7 +233,7 @@ EOF
 
 # Copy scripts folder into the new repo
 SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
-SCRIPTS_DEST="$DEST_DIR/scripts"
+SCRIPTS_DEST="$DEST_DIR"
 
 if [[ -d "$SCRIPTS_SOURCE" ]]; then
   echo "📁 Copying scripts/ to new repo"
