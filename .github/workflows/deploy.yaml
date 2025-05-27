@@ -1,0 +1,47 @@
+---
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Run Linters
+        run: ./repo-deploy/scripts/run_linters.sh
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubDeployRole
+
+      - name: Deploy CloudFormation Stacks
+        run: ./repo-deploy/scripts/aws/deploy_stacks.sh
+
+      - name: Provision with Ansible
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: aws-webserver/playbook.yml
+          directory: ./aws-webserver
+          options: "-i localhost, --connection=local"
+
+  # Azure and GCP deployment stubs
+  deploy-azure:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Azure deploy stub"
+
+  deploy-gcp:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "GCP deploy stub"
+
