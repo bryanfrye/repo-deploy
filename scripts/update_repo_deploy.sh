@@ -37,7 +37,7 @@ rm -rf "$TMP_DIR"
 git clone --depth 1 https://github.com/bryanfrye/repo-deploy.git "$TMP_DIR"
 
 rm -rf ./scripts
-cp -r "$TMP_DIR/scripts" .
+cp -r "$TMP_DIR/scripts" scripts
 cp "$TMP_DIR/Makefile" .
 
 # Step 4: Update version
