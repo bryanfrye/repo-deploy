@@ -39,6 +39,7 @@ git clone --depth 1 https://github.com/bryanfrye/repo-deploy.git "$TMP_DIR"
 rm -rf ./scripts
 cp -r "$TMP_DIR/scripts" scripts
 cp "$TMP_DIR/Makefile" .
+cp "$TMP_DIR/repo.toml" .
 rm -rf ./deploy
 cp -r "$TMP_DIR/examples/aws/deploy" .
 
