@@ -76,9 +76,7 @@ case "$PROVIDER" in
   aws)
     echo "🌐 Using cloud provider: $PROVIDER"
     mkdir -p deploy/cloudformation
-    cp "$TEMPLATE_SOURCE/ec2.yaml.example" "./deploy/cloudformation/ec2.yaml.example"
-    mkdir -p deploy/parameters
-    cp "$TEMPLATE_SOURCE/ec2.params.json.example" "./deploy/parameters/ec2.params.json.example"
+    cp "$TEMPLATE_SOURCE/*" "./deploy/cloudformation/"
     ;;
   *)
     echo "❌ Unsupported provider: $PROVIDER"

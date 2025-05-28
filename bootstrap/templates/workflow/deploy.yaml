@@ -108,4 +108,4 @@ jobs:
       - name: Deploy
         run: |
           git clone https://github.com/bryanfrye/repo-deploy.git
-          ./repo-deploy/scripts/deploy_stacks.sh
+          repo-deploy/scripts/aws/deploy_stacks.sh
