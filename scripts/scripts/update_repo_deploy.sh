@@ -36,8 +36,9 @@ curl -s "$REPO_DEPLOY_URL/.github/workflows/deploy.yaml" -o .github/workflows/de
 rm -rf "$TMP_DIR"
 git clone --depth 1 https://github.com/bryanfrye/repo-deploy.git "$TMP_DIR"
 
-rm -rf ./scripts/*
-cp -r "$TMP_DIR/scripts/*" .
+rm -rf ./scripts
+cp -r "$TMP_DIR/scripts" .
+cp "$TMP_DIR/Makefile" .
 
 # Step 4: Update version
 echo "$LATEST_HASH" > .repo-deploy-version
