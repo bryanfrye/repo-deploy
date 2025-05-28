@@ -40,7 +40,7 @@ rm -rf ./scripts
 cp -r "$TMP_DIR/scripts" scripts
 cp "$TMP_DIR/Makefile" .
 rm -rf ./deploy
-cp -r "$TMP_DIR/deploy" .
+cp -r "$TMP_DIR/examples/aws/deploy" .
 
 # Step 4: Update version
 echo "$LATEST_HASH" > .repo-deploy-version
