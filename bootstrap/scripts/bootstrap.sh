@@ -49,6 +49,7 @@ fi
 # -----------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_SOURCE="$SCRIPT_DIR/../templates/$PROVIDER"
+
 WORKFLOW_TEMPLATE="$SCRIPT_DIR/../template/workflows/deploy.yaml"
 
 if [[ ! -d "$TEMPLATE_SOURCE" ]]; then

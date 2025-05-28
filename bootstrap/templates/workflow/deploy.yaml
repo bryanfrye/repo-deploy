@@ -109,7 +109,8 @@ jobs:
         id: parse-stages
         run: |
           echo "📦 Parsing stages from repo.toml..."
-          STAGES=$(grep -oP 'stages\s*=\s*\[\K[^\]]+' repo.toml | tr -d '"' | tr -d ' ' | tr ',' '\n' | paste -sd, -)
+          STAGES=$(grep -oP 'stages\s*=\s*\[\K[^\]]+' repo.toml | \
+                   tr -d '"' | tr -d ' ' | tr ',' '\n' | paste -sd, -)
           echo "STAGES=$STAGES" >> $GITHUB_ENV
 
       - name: Install dependencies
