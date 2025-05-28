@@ -43,13 +43,12 @@ cp "$TMP_DIR/Makefile" .
 # Step 4: Update version
 echo "$LATEST_HASH" > .repo-deploy-version
 
+rm -rf "$TMP_DIR"
+
 # Optional: Auto commit
 git add .github/workflows/deploy.yaml scripts/ .repo-deploy-version
 git commit -m "🔄 Sync with repo-deploy ($LATEST_HASH)"
 git push
-
-# Cleanup
-rm -rf "$TMP_DIR"
 
 echo "✅ Updated to repo-deploy $LATEST_HASH"
 
