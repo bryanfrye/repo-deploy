@@ -49,6 +49,7 @@ fi
 # -----------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_SOURCE="$SCRIPT_DIR/../templates/$PROVIDER"
+WORKFLOW_TEMPLATE="$SCRIPT_DIR/../template/workflows/deploy.yaml"
 
 if [[ ! -d "$TEMPLATE_SOURCE" ]]; then
   echo "❌ ERROR: Template directory not found: $TEMPLATE_SOURCE"
@@ -74,7 +75,6 @@ case "$PROVIDER" in
     ;;
   aws)
     echo "🌐 Using cloud provider: $PROVIDER"
-    # Create initial AWS-specific files
     mkdir -p deploy/cloudformation
     cp "$TEMPLATE_SOURCE/ec2.yaml.example" "./deploy/cloudformation/ec2.yaml.example"
     mkdir -p deploy/parameters
@@ -93,7 +93,7 @@ if [[ ! -f README.md ]]; then
 
 $DESCRIPTION
 
-**Cloud Provider:** $PROVIDER
+**Cloud Provider:** $PROVIDER  
 **Selected Linters:** ${LINTERS:-none}
 EOF
 fi
@@ -103,11 +103,10 @@ if [[ -n "$LINTERS" ]]; then
   echo "$LINTERS" | tr ',' '\n' > .linters
 fi
 
-# Write .linters file
 IFS=',' read -ra LINTER_ARRAY <<< "$LINTERS"
 
-# Auto-include cfn_nag if provider is AWS
-if [[ "$PROVIDER" == "aws" && ! " ${LINTER_ARRAY[@]} " =~ " cfn_nag " ]]; then
+# Auto-include cfn_nag for AWS
+if [[ "$PROVIDER" == "aws" && ! " ${LINTER_ARRAY[*]} " =~ " cfn_nag " ]]; then
   LINTERS="$LINTERS,cfn_nag"
   echo "📎 Automatically adding cfn_nag for AWS projects"
 fi
@@ -115,126 +114,17 @@ fi
 # Final .linters output
 echo "$LINTERS" | tr ',' '\n' > .linters
 
-# Create GitHub workflow (will be enhanced later)
+# Add GitHub Actions workflow
 mkdir -p .github/workflows
-cat <<'EOF' > .github/workflows/deploy.yaml
----
-# Managed by repo-deploy
+if [[ -f "$WORKFLOW_TEMPLATE" ]]; then
+  cp "$WORKFLOW_TEMPLATE" ".github/workflows/deploy.yaml"
+else
+  echo "⚠️  Workflow template not found at $WORKFLOW_TEMPLATE"
+fi
 
-name: Deploy Infrastructure
-
-'on':
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  lint:
-    name: Run Linters
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Read requested linters
-        id: read-linters
-        run: |
-          if [[ -f .linters ]]; then
-            LINTERS=\$(cat .linters | tr '\n' ',')
-          else
-            LINTERS="none"
-          fi
-          echo "LINTERS=\$LINTERS" >> \$GITHUB_ENV
-
-      - name: Install requested linters
-        run: |
-          for linter in $LINTERS; do
-            case "$linter" in
-              yaml)
-                pip install yamllint
-                ;;
-              cloudformation)
-                pip install cfn-lint
-                ;;
-              shell)
-                sudo apt-get update && sudo apt-get install -y shellcheck
-                ;;
-              ansible)
-                pip install ansible-lint
-                ;;
-              terraform)
-                sudo apt-get install -y terraform
-                ;;
-              puppet)
-                gem install puppet-lint
-                ;;
-              ruby)
-                gem install rubocop
-                ;;
-              python)
-                pip install pylint
-                ;;
-              markdown)
-                npm install -g markdownlint-cli
-                ;;
-            esac
-          done
-
-      - name: Run selected linters
-        run: |
-          echo "Running linters: $LINTERS"
-          ./scripts/run_linters.sh
-
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Fetch latest repo-deploy commit hash
-        run: |
-          curl -s \
-            https://api.github.com/repos/bryanfrye/repo-deploy/commits/main \
-            | jq -r '.sha' | cut -c1-7 > latest-hash.txt
-
-      - name: Compare repo-deploy version
-        run: |
-          CURRENT=$(cat .repo-deploy-version)
-          LATEST=$(cat latest-hash.txt)
-
-          echo "🔁 Repo-deploy version check:"
-          echo "🔒 Current: $CURRENT"
-          echo "🌐 Latest : $LATEST"
-
-
-          if [[ "$CURRENT" != "$LATEST" ]]; then
-            echo "❌ Repo is using an outdated repo-deploy config."
-            echo "Please re-bootstrap or run the sync script"
-            echo "to pull the latest workflow/scripts."
-            exit 1
-          fi
-
-      - name: Deploy to $PROVIDER
-        runs-on: ubuntu-latest
-        environment: production
-        needs: lint
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v3
-
-          - name: Configure Credentials
-            run: echo "Configure credentials for $PROVIDER (stub)"
-
-          - name: Deploy
-            run: |
-              git clone https://github.com/bryanfrye/repo-deploy.git
-              ./repo-deploy/scripts/deploy_stacks.sh
-EOF
-
-# Copy scripts folder into the new repo
+# Copy scripts folder
 SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
 SCRIPTS_DEST="scripts"
-
 if [[ -d "$SCRIPTS_SOURCE" ]]; then
   echo "📁 Copying scripts/ to new repo"
   mkdir -p "$SCRIPTS_DEST"
@@ -242,10 +132,14 @@ if [[ -d "$SCRIPTS_SOURCE" ]]; then
 else
   echo "⚠️  scripts/ folder not found in repo-deploy"
 fi
-cp "$SCRIPT_DIR/../../Makefile" "Makefile"
+
+# Pre-commit hook
 cp "$SCRIPT_DIR/../hooks/pre-commit" "$DEST_DIR/.git/hooks/pre-commit"
 chmod +x "$DEST_DIR/.git/hooks/pre-commit"
 echo "✅ Pre-commit hook installed at $DEST_DIR/.git/hooks/pre-commit"
+
+# Add Makefile
+cp "$SCRIPT_DIR/../../Makefile" "Makefile"
 
 # Initial commit
 git config user.name "github-actions"
@@ -254,4 +148,3 @@ git add .
 git commit -m "Initial scaffold for $PROVIDER"
 
 echo "✅ Repo $REPO_NAME bootstrapped in $DEST_DIR"
-
