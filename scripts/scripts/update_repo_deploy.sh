@@ -48,7 +48,7 @@ git commit -m "🔄 Sync with repo-deploy ($LATEST_HASH)"
 git push
 
 # Cleanup
-rm -rf "$TMP_DIR"
+#rm -rf "$TMP_DIR"
 
 echo "✅ Updated to repo-deploy $LATEST_HASH"
 

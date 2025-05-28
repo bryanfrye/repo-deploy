@@ -1,4 +1,4 @@
-.PHONY: lint deploy check-version
+.PHONY: lint deploy check-version update
 
 # Run all configured linters
 lint:
