@@ -46,8 +46,10 @@ deploy-preview:
 			if [ -f "$$playbook" ]; then \
 				echo "✔️  Would run: $$script $$role"; \
 				echo "📜  Tasks/Roles in $$playbook:"; \
-				yq e '.[] | select(has("tasks")) | .tasks[].name // "  - unnamed task"' "$$playbook" 2>/dev/null || \
-				grep -E '^- name:|^- import_playbook:|^- include:|^- role:' "$$playbook" | sed 's/^/ - /'; \
+    		yq e '.[] | select(has("tasks")) | .tasks[].name // "unnamed task"' "$$playbook" 2>/dev/null \
+      		| sed 's/^/ - /' || \
+    		grep -E '^- name:|^- import_playbook:|^- include:|^- role:' "$$playbook" \
+      		| sed 's/^/ - /'; \
 			else \
 				echo "❌ Playbook not found: $$playbook"; \
 			fi; \
