@@ -105,7 +105,52 @@ jobs:
             exit 1
           fi
 
+      - name: Parse stages from repo.toml
+        id: parse-stages
+        run: |
+          echo "📦 Parsing stages from repo.toml..."
+          STAGES=$(grep -oP 'stages\s*=\s*\[\K[^\]]+' repo.toml | tr -d '"' | tr -d ' ' | tr ',' '\n' | paste -sd, -)
+          echo "STAGES=$STAGES" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing dependencies..."
+          sudo apt-get update
+          for stage in $(echo "$STAGES" | tr ',' '\n'); do
+            provider=${stage%%.*}"
+            role="${stage#*.}"
+            echo "🔧 Installing dependencies for $provider / $role"
+
+            case "$provider" in
+              aws)
+                sudo apt-get install -y awscli
+                ;;
+              azure)
+                curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+                ;;
+              gcp)
+                curl https://sdk.cloud.google.com | bash
+                exec -l $SHELL
+                gcloud init
+                ;;
+              ansible)
+                sudo apt-get install -y ansible
+                ;;
+              *)
+                echo "Unknown provider: $provider"
+                exit 1
+                ;;
+            esac
       - name: Deploy
         run: |
-          git clone https://github.com/bryanfrye/repo-deploy.git
-          repo-deploy/scripts/aws/deploy_stacks.sh
+          echo "🚀 Deploying infrastructure..."
+          for stage in $(echo "$STAGES" | tr ',' '\n'); do
+            provider=${stage%%.*}
+            role="${stage#*.}"
+            script="./repo-deploy/scripts/deploy_${provider}.sh"
+            if [[ -x "$script" ]]; then
+              "$script" "$role"
+            else
+              echo "❌ No deploy script found for $provider"
+            fi
+          done
