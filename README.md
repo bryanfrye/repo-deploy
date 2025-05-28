@@ -12,14 +12,13 @@
 
 ## 📦 What It Does
 
-- Bootstraps new repositories using a Q&A interface
+- Bootstraps new repositories using CLI with provider-specific templates
 - Automatically creates directory structure and starter files
-- Installs cloud-specific templates (e.g., CloudFormation for AWS)
 - Configures `.github/workflows/deploy.yaml` to:
   - Install and run selected linters
   - Deploy cloud resources using defined templates
 - Centralizes shared linting logic via `scripts/linters/`
-- Uses a `.linters` file to dynamically configure linting per repo
+- Allows updating of `.github/workflows/deploy.yaml` and other pertenent settings from a central location
 
 ## 🚀 Quick Start
 
@@ -85,6 +84,10 @@ scripts/
 - Azure and GCP support
 - Template validation for each cloud provider
 - Web-based repo creation via GitHub issue forms
+- Multi-account support (e.g., AWS Organizations, Azure Management Groups, GCP Organizations)
+- Support for multiple environments (dev, staging, prod)
+- Integration with Terraform, Pulumi, and other IaC tools
+- API support for retreiving repo metadata and objects from cloud providers to use in workflows and templates
 
 ⸻
 
