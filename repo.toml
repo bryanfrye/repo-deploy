@@ -4,4 +4,4 @@
 region = "us-east-1"
 tag_key = "Project"
 tag_value = "example-repo"
-stages = [ "ec2-sg", "alb", "ec2" ]
+stages = [ "aws.webserver", "ansible.lamp" ]

@@ -1,0 +1,62 @@
+---
+- name: Configure LAMP stack on EC2 instances
+  hosts: all
+  become: yes
+  vars:
+    php_packages:
+      - php
+      - php-mysqlnd
+    apache_pkg: httpd
+    mysql_pkg: mariadb-server
+    doc_root: /var/www/html
+
+  tasks:
+    - name: Install Apache
+      yum:
+        name: "{{ apache_pkg }}"
+        state: present
+
+    - name: Ensure Apache is started and enabled
+      service:
+        name: "{{ apache_pkg }}"
+        state: started
+        enabled: yes
+
+    - name: Install PHP and extensions
+      yum:
+        name: "{{ php_packages }}"
+        state: present
+
+    - name: Install MariaDB (MySQL compatible)
+      yum:
+        name: "{{ mysql_pkg }}"
+        state: present
+
+    - name: Ensure MariaDB is started and enabled
+      service:
+        name: "{{ mysql_pkg }}"
+        state: started
+        enabled: yes
+
+    - name: Create a sample PHP info page
+      copy:
+        dest: "{{ doc_root }}/index.php"
+        content: "<?php phpinfo(); ?>"
+
+    - name: Open firewall for HTTP/HTTPS (if firewalld is used)
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        state: enabled
+        immediate: yes
+      loop:
+        - http
+        - https
+      when: ansible_facts['distribution'] == "Amazon"
+
+    - name: Ensure firewalld is running (if present)
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+      when: ansible_facts['distribution'] == "Amazon"
