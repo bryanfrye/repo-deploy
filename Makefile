@@ -24,17 +24,32 @@ deploy-preview:
 	@echo "🔎 Previewing deployment plan..."
 	@selected_stages="$${STAGES:-$(STAGES)}"; \
 	for stage in $${selected_stages//,/ }; do \
-		provider=$${stage%%.*}; \
-		role=$${stage#*.}; \
-		script="scripts/deploy/deploy_$${provider}.sh"; \
+		if [[ "$$stage" == *.* ]]; then \
+			provider=$${stage%%.*}; \
+			role=$${stage#*.}; \
+		else \
+			provider="aws"; \
+			role=$$stage; \
+		fi; \
+		script="scripts/deploy/deploy_$$provider.sh"; \
 		if [ "$$provider" = "aws" ]; then \
 			template="deploy/cloudformation/$$role.yaml"; \
 			if [ -f "$$template" ]; then \
 				echo "✔️  Would run: $$script $$role"; \
 				echo "📦  CloudFormation resources in $$template:"; \
-				yq e '.Resources | to_entries[] | " - " + .key + ": " + .value.Type' "$$template"; \
+				yq e '.Resources | to_entries[] | " - " + .key + ": " + .value.Type' "$$template" || echo "⚠️  yq failed to parse"; \
 			else \
 				echo "❌ Template not found: $$template"; \
+			fi; \
+		elif [ "$$provider" = "ansible" ]; then \
+			playbook="deploy/ansible/$$role.playbook"; \
+			if [ -f "$$playbook" ]; then \
+				echo "✔️  Would run: $$script $$role"; \
+				echo "📜  Tasks/Roles in $$playbook:"; \
+				yq e '.[] | select(has("tasks")) | .tasks[].name // "  - unnamed task"' "$$playbook" 2>/dev/null || \
+				grep -E '^- name:|^- import_playbook:|^- include:|^- role:' "$$playbook" | sed 's/^/ - /'; \
+			else \
+				echo "❌ Playbook not found: $$playbook"; \
 			fi; \
 		elif [ -f "$$script" ]; then \
 			echo "✔️  Would run: $$script $$role"; \
