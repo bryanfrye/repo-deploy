@@ -37,8 +37,10 @@ cd repo-deploy
 - ✅ Initialize it with provider-specific templates (e.g., CloudFormation under deploy/cloudformation/)
 - ✅ Add a .linters file with selected linters (e.g., yaml, cloudformation)
 - ✅ Add .github/workflows/deploy.yaml that:
-- Installs only the requested linters
-- Calls scripts/run_linters.sh to run them
+- ✅ Installs only the requested linters
+- ✅ Calls scripts/run_linters.sh to run them
+- ✅ Sets up a basic CI/CD pipeline for the new repo
+- ✅ Deploy to AWS using the CloudFormation templates supplied with configuration from the repo.toml file
 
 ### 🛠️ Linters Supported
 - yaml → yamllint
@@ -50,6 +52,7 @@ cd repo-deploy
 - ruby → rubocop
 - python → pylint
 - markdown → markdownlint-cli
+- cfn-nag → cfn_nag
 
 ### 🧰 Scripts Overview
 ```bash
@@ -72,7 +75,9 @@ scripts/
 │   ├── run_linters.sh
 │   └── linters/
 ├── .linters                  # List of linters for this repo
-└── README.md
+├── README.md
+├── Makefile                  # Optional Makefile for convenience
+├── repo.toml                 # TOML file for repo metadata
 ```
 
 ### 🧪 Roadmap
