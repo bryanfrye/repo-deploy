@@ -233,7 +233,7 @@ EOF
 
 # Copy scripts folder into the new repo
 SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
-SCRIPTS_DEST="$DEST_DIR"
+SCRIPTS_DEST="scripts"
 
 if [[ -d "$SCRIPTS_SOURCE" ]]; then
   echo "📁 Copying scripts/ to new repo"
@@ -242,7 +242,7 @@ if [[ -d "$SCRIPTS_SOURCE" ]]; then
 else
   echo "⚠️  scripts/ folder not found in repo-deploy"
 fi
-
+cp "$SCRIPT_DIR/../../Makefile" "Makefile"
 cp "$SCRIPT_DIR/../hooks/pre-commit" "$DEST_DIR/.git/hooks/pre-commit"
 chmod +x "$DEST_DIR/.git/hooks/pre-commit"
 echo "✅ Pre-commit hook installed at $DEST_DIR/.git/hooks/pre-commit"
