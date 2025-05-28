@@ -34,10 +34,10 @@ jobs:
                 pip install yamllint
                 ;;
               cloudformation)
-                pip install cfn-lint
+                pip3 install cfn-lint
                 ;;
               cfn_nag)
-                gem install cfn-nag
+                gem install cfn_nag
                 ;;
               shell)
                 sudo apt-get update && sudo apt-get install -y shellcheck
