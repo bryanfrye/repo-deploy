@@ -4,6 +4,7 @@ set -euo pipefail
 stage="${1:-}"
 REPO_TOML="./repo.toml"
 TEMPLATE_DIR="./deploy/cloudformation"
+TMP_DIR="./tmp"
 
 if [[ -z "$stage" ]]; then
   echo "❌ Usage: $0 <stage-name>"
@@ -18,20 +19,31 @@ fi
 REGION=$(grep '^region' "$REPO_TOML" | cut -d'=' -f2 | tr -d ' "')
 TAG_KEY=$(grep '^tag_key' "$REPO_TOML" | cut -d'=' -f2 | tr -d ' "')
 TAG_VALUE=$(grep '^tag_value' "$REPO_TOML" | cut -d'=' -f2 | tr -d ' "')
+ARTIFACT_BUCKET=$(grep '^artifact_bucket' "$REPO_TOML" | cut -d'=' -f2 | tr -d ' "')
 
 template="$TEMPLATE_DIR/$stage.yaml"
 stack_name="${stage}-stack"
+packaged_template="$TMP_DIR/${stage}_packaged.yaml"
 
 echo "::group::🔧 Deploying AWS stack for stage: $stage"
-echo "   Region     : $REGION"
-echo "   Template   : $template"
-echo "   Stack Name : $stack_name"
-echo "   Tags       : $TAG_KEY=$TAG_VALUE"
+echo "   Region          : $REGION"
+echo "   Template        : $template"
+echo "   Stack Name      : $stack_name"
+echo "   Tags            : $TAG_KEY=$TAG_VALUE"
+echo "   Artifact Bucket : $ARTIFACT_BUCKET"
 
 if [[ ! -f "$template" ]]; then
   echo "❌ Template not found: $template"
   exit 1
 fi
+
+# Package with CloudFormation to inject S3 paths
+mkdir -p "$TMP_DIR"
+echo "📦 Packaging CloudFormation template to $packaged_template"
+aws cloudformation package \
+  --template-file "$template" \
+  --s3-bucket "$ARTIFACT_BUCKET" \
+  --output-template-file "$packaged_template"
 
 # Check if stack exists
 exists=$(aws cloudformation describe-stacks \
@@ -44,7 +56,7 @@ if [[ -z "$exists" ]]; then
   echo "-> Creating new stack with termination protection..."
   aws cloudformation create-stack \
     --stack-name "$stack_name" \
-    --template-body "file://$template" \
+    --template-body "file://$packaged_template" \
     --region "$REGION" \
     --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
     --tags "${TAG_KEY}=${TAG_VALUE}" \
@@ -52,7 +64,7 @@ if [[ -z "$exists" ]]; then
 else
   echo "-> Updating existing stack..."
   aws cloudformation deploy \
-    --template-file "$template" \
+    --template-file "$packaged_template" \
     --stack-name "$stack_name" \
     --region "$REGION" \
     --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
@@ -73,4 +85,5 @@ if [[ -n "$errors" ]]; then
 fi
 
 echo "✅ Stack $stack_name deployed successfully."
+rm -rf "$TMP_DIR"
 echo "::endgroup::"

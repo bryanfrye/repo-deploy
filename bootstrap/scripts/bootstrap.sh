@@ -146,4 +146,3 @@ git config user.email "github-actions@github.com"
 git add .
 git commit -m "Initial scaffold for $PROVIDER"
 
-echo "✅ Repo $REPO_NAME bootstrapped in $DEST_DIR"
