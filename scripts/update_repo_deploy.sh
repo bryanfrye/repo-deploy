@@ -47,8 +47,6 @@ rm -rf "$TMP_DIR"
 
 # Optional: Auto commit
 git add .github/workflows/deploy.yaml scripts/ .repo-deploy-version
-git commit -m "🔄 Sync with repo-deploy ($LATEST_HASH)"
-git push
 
 echo "✅ Updated to repo-deploy $LATEST_HASH"
 
