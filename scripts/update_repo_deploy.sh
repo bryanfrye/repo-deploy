@@ -20,7 +20,7 @@
 set -o nounset                              # Treat unset variables as an error
 set -euo pipefail
 
-REPO_DEPLOY_URL="https://raw.githubusercontent.com/bryanfrye/repo-deploy/blob/main"
+REPO_DEPLOY_URL="https://raw.githubusercontent.com/bryanfrye/repo-deploy/main"
 TMP_DIR=".tmp-repo-deploy"
 
 echo "🚀 Updating from latest repo-deploy..."
@@ -30,7 +30,7 @@ LATEST_HASH=$(curl -s https://api.github.com/repos/bryanfrye/repo-deploy/commits
 
 # Step 2: Download deploy.yaml
 mkdir -p .github/workflows
-curl -s "$REPO_DEPLOY_URL/bootstrap/template/workflows/deploy.yaml" -o .github/workflows/deploy.yaml
+curl -s "$REPO_DEPLOY_URL/bootstrap/templates/workflow/deploy.yaml" -o .github/workflows/deploy.yaml
 
 # Step 3: Sync scripts/ (quick + dirty version)
 rm -rf "$TMP_DIR"
