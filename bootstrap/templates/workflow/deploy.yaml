@@ -38,7 +38,8 @@ jobs:
                 pip install cfn-lint
                 ;;
               cfn_nag)
-                sudo apt-get update && sudo apt-get install -y ruby ruby-dev build-essential
+                sudo apt-get update
+                sudo apt-get install -y ruby ruby-dev build-essential
                 gem install cfn_nag
                 ;;
               shell)
