@@ -1,4 +1,13 @@
 .PHONY: lint deploy check-version update
+.DEFAULT_GOAL := help
+
+# Help target to display available commands
+help:
+	@echo "Available commands:"
+	@echo "  lint          - Run all configured linters"
+	@echo "  deploy        - Run the deployment logic"
+	@echo "  check-version - Check repo-deploy version"
+	@echo "  update        - Update dependencies"
 
 # Run all configured linters
 lint:
