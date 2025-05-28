@@ -1,0 +1,104 @@
+---
+# Managed by repo-deploy
+
+name: Deploy Infrastructure
+
+'on':
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Run Linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read requested linters
+        id: read-linters
+        run: |
+          if [[ -f .linters ]]; then
+            LINTERS=$(cat .linters | tr '\n' ',')
+          else
+            LINTERS="none"
+          fi
+          echo "LINTERS=$LINTERS" >> $GITHUB_ENV
+
+      - name: Install requested linters
+        run: |
+          for linter in $LINTERS; do
+            case "$linter" in
+              yaml)
+                pip install yamllint
+                ;;
+              cloudformation)
+                pip install cfn-lint
+                ;;
+              cfn_nag)
+                gem install cfn-nag
+                ;;
+              shell)
+                sudo apt-get update && sudo apt-get install -y shellcheck
+                ;;
+              ansible)
+                pip install ansible-lint
+                ;;
+              terraform)
+                sudo apt-get install -y terraform
+                ;;
+              puppet)
+                gem install puppet-lint
+                ;;
+              ruby)
+                gem install rubocop
+                ;;
+              python)
+                pip install pylint
+                ;;
+              markdown)
+                npm install -g markdownlint-cli
+                ;;
+            esac
+          done
+
+      - name: Run selected linters
+        run: |
+          echo "Running linters: $LINTERS"
+          ./scripts/run_linters.sh
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: lint
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch latest repo-deploy commit hash
+        run: |
+          curl -s \
+            https://api.github.com/repos/bryanfrye/repo-deploy/commits/main \
+            | jq -r '.sha' | cut -c1-7 > latest-hash.txt
+
+      - name: Compare repo-deploy version
+        run: |
+          CURRENT=$(cat .repo-deploy-version)
+          LATEST=$(cat latest-hash.txt)
+
+          echo "🔁 Repo-deploy version check:"
+          echo "🔒 Current: $CURRENT"
+          echo "🌐 Latest : $LATEST"
+
+          if [[ "$CURRENT" != "$LATEST" ]]; then
+            echo "❌ Repo is using an outdated repo-deploy config."
+            echo "Please re-bootstrap or run the sync script"
+            echo "to pull the latest workflow/scripts."
+            exit 1
+          fi
+
+      - name: Deploy
+        run: |
+          git clone https://github.com/bryanfrye/repo-deploy.git
+          ./repo-deploy/scripts/deploy_stacks.sh
