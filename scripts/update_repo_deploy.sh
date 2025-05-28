@@ -20,7 +20,7 @@
 set -o nounset                              # Treat unset variables as an error
 set -euo pipefail
 
-REPO_DEPLOY_URL="https://raw.githubusercontent.com/bryanfrye/repo-deploy/main"
+REPO_DEPLOY_URL="https://raw.githubusercontent.com/bryanfrye/repo-deploy/blob/main"
 TMP_DIR=".tmp-repo-deploy"
 
 echo "🚀 Updating from latest repo-deploy..."
