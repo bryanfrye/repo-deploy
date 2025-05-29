@@ -59,7 +59,7 @@ if [[ -z "$exists" ]]; then
     --template-body "file://$packaged_template" \
     --region "$REGION" \
     --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-    --tags "${TAG_KEY}=${TAG_VALUE}" \
+    --tags Key="${TAG_KEY}",Value="${TAG_VALUE}" \
     --enable-termination-protection
 else
   echo "-> Updating existing stack..."
@@ -68,7 +68,7 @@ else
     --stack-name "$stack_name" \
     --region "$REGION" \
     --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-    --tags "${TAG_KEY}=${TAG_VALUE}"
+    --tags Key="${TAG_KEY}",Value="${TAG_VALUE}"
 fi
 
 # Check for stack event errors
