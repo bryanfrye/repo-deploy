@@ -49,13 +49,20 @@ mkdir -p "$DEST_DIR"
   --dest-dir "$DEST_DIR"
 
 # Create the S3 bucket for artifacts
-aws s3api create-bucket --bucket "$ARTIFACT_BUCKET" --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
+#aws s3api create-bucket --bucket "$ARTIFACT_BUCKET" --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
 
 # Enable versioning on the S3 bucket
-aws s3api put-bucket-versioning --bucket "$ARTIFACT_BUCKET" --versioning-configuration Status=Enabled
+#aws s3api put-bucket-versioning --bucket "$ARTIFACT_BUCKET" --versioning-configuration Status=Enabled
 
 # Inject bucket name into repo.toml
-sed -i "s|^artifact_bucket =.*|artifact_bucket = \"$ARTIFACT_BUCKET\"|" "$DEST_DIR/repo.toml"
+REPO_TOML="$DEST_DIR/repo.toml"
+
+# Replace if exists, append if not
+if grep -q '^artifact_bucket' "$REPO_TOML"; then
+  sed -i '' "s|^artifact_bucket =.*|artifact_bucket = \"$ARTIFACT_BUCKET\"|" "$REPO_TOML"
+else
+  echo "artifact_bucket = \"$ARTIFACT_BUCKET\"" >> "$REPO_TOML"
+fi
 
 echo "✅ Created artifact bucket: $ARTIFACT_BUCKET"
 echo "✅ Bootstrap completed successfully!"

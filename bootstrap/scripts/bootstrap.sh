@@ -48,15 +48,7 @@ fi
 # Resolve absolute template path
 # -----------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_SOURCE="$SCRIPT_DIR/../templates/$PROVIDER"
-
 WORKFLOW_TEMPLATE="$SCRIPT_DIR/../template/workflows/deploy.yaml"
-
-if [[ ! -d "$TEMPLATE_SOURCE" ]]; then
-  echo "❌ ERROR: Template directory not found: $TEMPLATE_SOURCE"
-  exit 1
-fi
-
 VERSION_HASH=$(git rev-parse --short HEAD)
 echo "$VERSION_HASH" > "$DEST_DIR/.repo-deploy-version"
 
@@ -69,21 +61,6 @@ echo "📁 Destination: $DEST_DIR"
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 git init
-
-case "$PROVIDER" in
-  azure|gcp)
-    echo "🌐 Using cloud provider: $PROVIDER"
-    ;;
-  aws)
-    echo "🌐 Using cloud provider: $PROVIDER"
-    mkdir -p deploy/cloudformation
-    cp "$TEMPLATE_SOURCE/*" "./deploy/cloudformation/"
-    ;;
-  *)
-    echo "❌ Unsupported provider: $PROVIDER"
-    exit 1
-    ;;
-esac
 
 # Create README.md
 if [[ ! -f README.md ]]; then
@@ -132,6 +109,6 @@ cp "$SCRIPT_DIR/../../Makefile" "Makefile"
 # Initial commit
 git config user.name "github-actions"
 git config user.email "github-actions@github.com"
-git add .
-git commit -m "Initial scaffold for $PROVIDER"
+#git add .
+#git commit -m "Initial scaffold for $PROVIDER"
 
