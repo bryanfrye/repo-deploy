@@ -12,7 +12,7 @@ for stage in $STAGES; do
 
   case "$provider" in
     aws|azure|gcp)
-      script="./repo-deploy/scripts/deploy_${provider}.sh"
+      script="./scripts/deploy/deploy_${provider}.sh"
       if [[ -x "$script" ]]; then
         "$script" "$role" || {
           echo "❌ Deployment failed for $provider / $role"
