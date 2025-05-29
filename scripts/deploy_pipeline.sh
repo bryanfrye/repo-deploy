@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_TOML="repo.toml"
-STAGES=$(grep -oP 'stages\s*=\s*\[\K[^\]]+' "$REPO_TOML" | tr -d '"' | tr -d ' ' | tr ',' '\n')
+STAGES=$(sed -n 's/^stages *= *\[\(.*\)\]/\1/p' "$REPO_TOML" | tr -d '"' | tr -d ' ' | tr ',' '\n')
 
 echo "🚀 Deploying infrastructure..."
 for stage in $STAGES; do
