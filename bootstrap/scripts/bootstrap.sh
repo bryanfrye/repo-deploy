@@ -121,25 +121,6 @@ else
   echo "⚠️  Workflow template not found at $WORKFLOW_TEMPLATE"
 fi
 
-# Copy scripts folder
-SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
-SCRIPTS_DEST="$DEST_DIR/scripts"
-
-if [[ -d "$SCRIPTS_SOURCE" ]]; then
-  echo "📁 Copying scripts/ to $SCRIPTS_DEST"
-  mkdir -p "$SCRIPTS_DEST"
-  shopt -s nullglob
-  files=("$SCRIPTS_SOURCE"/*)
-  if (( ${#files[@]} )); then
-    cp -R "${files[@]}" "$SCRIPTS_DEST/"
-  else
-    echo "⚠️  No scripts found to copy from $SCRIPTS_SOURCE"
-  fi
-  shopt -u nullglob
-else
-  echo "⚠️  scripts/ folder not found in repo-deploy"
-fi
-
 # Pre-commit hook
 cp "$SCRIPT_DIR/../hooks/pre-commit" "$DEST_DIR/.git/hooks/pre-commit"
 chmod +x "$DEST_DIR/.git/hooks/pre-commit"
