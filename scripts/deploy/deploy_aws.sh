@@ -40,10 +40,16 @@ fi
 # Package with CloudFormation to inject S3 paths
 mkdir -p "$TMP_DIR"
 echo "📦 Packaging CloudFormation template to $packaged_template"
-aws cloudformation package \
+if aws cloudformation package \
   --template-file "$template" \
   --s3-bucket "$ARTIFACT_BUCKET" \
-  --output-template-file "$packaged_template"
+  --output-template-file "$packaged_template" \
+  > /dev/null; then
+  echo "✅ Template packaged successfully: $packaged_template"
+else
+  echo "❌ Failed to package template."
+  exit 1
+fi
 
 # Check if stack exists
 exists=$(aws cloudformation describe-stacks \
