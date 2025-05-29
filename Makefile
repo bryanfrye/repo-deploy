@@ -63,7 +63,7 @@ deploy-preview:
 # Run the deployment logic
 deploy:
 	@echo "🚀 Running deploy logic..."
-  @./scripts/deploy_pipeline.sh
+	@./scripts/deploy_pipeline.sh
 
 list-stages:
 	@echo "📜 Available stages in repo.toml:"
