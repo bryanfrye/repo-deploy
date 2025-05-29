@@ -26,7 +26,7 @@ PROVIDER=${2:-"aws"}
 LINTERS=${3:-"yaml,cloudformation"}
 DESCRIPTION=${4:-"Example repo generated via repo-deploy"}
 DEST_DIR=${5:-"$PWD/../$REPO_NAME"}  # Defaults to one level up
-ARTIFACT_BUCKET="cf-artifacts-${REPO_NAME,,}"  # Lowercase bucket name
+ARTIFACT_BUCKET="cf-artifacts-$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
 
 echo "🔧 Starting bootstrap with:"
 echo "  Repo Name   : $REPO_NAME"

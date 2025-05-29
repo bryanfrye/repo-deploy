@@ -123,11 +123,19 @@ fi
 
 # Copy scripts folder
 SCRIPTS_SOURCE="$SCRIPT_DIR/../../scripts"
-SCRIPTS_DEST="scripts"
+SCRIPTS_DEST="$DEST_DIR/scripts"
+
 if [[ -d "$SCRIPTS_SOURCE" ]]; then
-  echo "📁 Copying scripts/ to new repo"
+  echo "📁 Copying scripts/ to $SCRIPTS_DEST"
   mkdir -p "$SCRIPTS_DEST"
-  cp -R "$SCRIPTS_SOURCE/"* "$SCRIPTS_DEST/"
+  shopt -s nullglob
+  files=("$SCRIPTS_SOURCE"/*)
+  if (( ${#files[@]} )); then
+    cp -R "${files[@]}" "$SCRIPTS_DEST/"
+  else
+    echo "⚠️  No scripts found to copy from $SCRIPTS_SOURCE"
+  fi
+  shopt -u nullglob
 else
   echo "⚠️  scripts/ folder not found in repo-deploy"
 fi
