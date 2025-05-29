@@ -63,19 +63,7 @@ deploy-preview:
 # Run the deployment logic
 deploy:
 	@echo "🚀 Running deploy logic..."
-	@STAGES=$${STAGES:-aws.webserver}; \
-	for stage in $${STAGES//,/ }; do \
-		provider=$${stage%%.*}; \
-		role=$${stage#*.}; \
-		script=./scripts/deploy/deploy_$${provider}.sh; \
-		if [[ -x "$$script" ]]; then \
-			echo "🔧 Deploying $$provider / $$role..."; \
-			$$script "$$role"; \
-		else \
-			echo "❌ No deploy script found for provider '$$provider'"; \
-			exit 1; \
-		fi; \
-	done
+  @./scripts/deploy_pipeline.sh
 
 list-stages:
 	@echo "📜 Available stages in repo.toml:"
