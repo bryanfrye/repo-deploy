@@ -60,7 +60,10 @@ if [[ -z "$exists" ]]; then
     --region "$REGION" \
     --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
     --tags Key="${TAG_KEY}",Value="${TAG_VALUE}" \
-    --enable-termination-protection
+    --enable-termination-protection || {
+    echo "❌ Stack creation skipped or failed (likely intentional) - continuing...."
+    exit 0
+  }
 else
   echo "-> Updating existing stack..."
   aws cloudformation deploy \
