@@ -142,6 +142,7 @@ jobs:
                 exit 1
                 ;;
             esac
+          done
       - name: Deploy
         run: |
           echo "🚀 Deploying infrastructure..."
